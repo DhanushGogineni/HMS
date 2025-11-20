@@ -1,0 +1,44 @@
+/* static/css/style.css */
+
+body {
+    background-color: #f0f2f5; /* Very light gray/blue background */
+    font-family: Arial, sans-serif;
+}
+
+/* Enhancing navigation and cards */
+.bg-primary {
+    background-color: #007bff !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Custom button styles */
+.btn-primary, .btn-success, .btn-danger {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+
+/* Rounded corners for better aesthetics */
+.rounded-pill {
+    border-radius: 50rem !important;
+}
+
+/* Dashboard Card Styles */
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-weight: 600;
+}
+
+/* Table styling for dashboards */
+.table-hover tbody tr:hover {
+    background-color: #e2f1ff;
+    cursor: pointer;
+}

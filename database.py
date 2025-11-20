@@ -1,0 +1,132 @@
+# database.py
+import sqlite3
+from werkzeug.security import generate_password_hash
+import os
+
+DATABASE = 'hms.db'
+
+def get_db_connection():
+    """Establishes a connection to the SQLite database."""
+    conn = sqlite3.connect(DATABASE)
+    # Allows accessing columns by name instead of index
+    conn.row_factory = sqlite3.Row 
+    return conn
+
+def init_db():
+    """Creates all necessary tables and seeds the initial Admin user."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # --- TABLE CREATION ---
+    
+    # 1. User Table (Authentication & Common Details)
+    # Stores basic login and role info for all users (Admin, Doctor, Patient)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('Admin', 'Doctor', 'Patient')),
+            name TEXT NOT NULL,
+            contact_info TEXT,
+            is_active BOOLEAN DEFAULT 1 -- For blacklisting/removal
+        );
+    ''')
+
+    # 2. Department Table (Specializations)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS department (
+            dept_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL,
+            description TEXT
+        );
+    ''')
+    
+    # 3. Doctor Table (Role-Specific Details, linked to User and Department)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS doctor (
+            doctor_id INTEGER PRIMARY KEY,
+            dept_id INTEGER NOT NULL,
+            specialization_name TEXT NOT NULL,
+            FOREIGN KEY (doctor_id) REFERENCES user (user_id),
+            FOREIGN KEY (dept_id) REFERENCES department (dept_id)
+        );
+    ''')
+    
+    # 4. Patient Table (Role-Specific Details, linked to User)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS patient (
+            patient_id INTEGER PRIMARY KEY,
+            dob TEXT,
+            FOREIGN KEY (patient_id) REFERENCES user (user_id)
+        );
+    ''')
+    
+    # 5. DoctorAvailability Table (For scheduling logic)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS doctor_availability (
+            avail_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doctor_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL,
+            -- Ensure a doctor doesn't set the same time twice for the same date
+            UNIQUE(doctor_id, date, start_time), 
+            FOREIGN KEY (doctor_id) REFERENCES doctor (doctor_id)
+        );
+    ''')
+    
+    # 6. Appointment Table (The core event)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS appointment (
+            app_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_id INTEGER NOT NULL,
+            doctor_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            status TEXT NOT NULL CHECK(status IN ('Booked', 'Completed', 'Cancelled')),
+            -- Prevent multiple appointments at the same date and time for the same doctor
+            UNIQUE(doctor_id, date, time), 
+            FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+            FOREIGN KEY (doctor_id) REFERENCES doctor (doctor_id)
+        );
+    ''')
+    
+    # 7. Treatment Table (Diagnosis, Prescription, Notes)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS treatment (
+            treatment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            app_id INTEGER UNIQUE NOT NULL, -- One treatment record per appointment
+            diagnosis TEXT NOT NULL,
+            prescription TEXT NOT NULL,
+            notes TEXT,
+            FOREIGN KEY (app_id) REFERENCES appointment (app_id)
+        );
+    ''')
+
+    # --- ADMIN SEEDING (CRITICAL REQUIREMENT) ---
+    admin_username = 'admin'
+    admin_password = 'adminpassword' 
+    
+    # Check if admin already exists to prevent duplication
+    cursor.execute("SELECT user_id FROM user WHERE username = ?", (admin_username,))
+    if cursor.fetchone() is None:
+        # Hash the password before storing it for security
+        admin_password_hash = generate_password_hash(admin_password)
+        cursor.execute('''
+            INSERT INTO user (username, password_hash, role, name)
+            VALUES (?, ?, ?, ?);
+        ''', (admin_username, admin_password_hash, 'Admin', 'Super Admin Staff'))
+        print(f"Admin user created: {admin_username} / {admin_password}")
+
+    conn.commit()
+    conn.close()
+
+if __name__ == '__main__':
+    # Initialize DB if running database.py directly
+    if not os.path.exists(DATABASE):
+        print("Database not found. Initializing database...")
+        init_db()
+    else:
+        print("Database already exists. Running init_db() to ensure tables and admin user are present.")
+        init_db()

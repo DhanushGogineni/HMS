@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 text-center">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Hospital Management System</h1>
+        <p class="col-md-8 fs-4 mx-auto">Efficiently manage patients, doctors, and appointments.</p>
+        <p class="fs-6">Please log in to access your dashboard.</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('login') }}">Go to Login</a>
+        <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('register') }}">Patient Register</a>
+    </div>
+</div>
+{% endblock %}

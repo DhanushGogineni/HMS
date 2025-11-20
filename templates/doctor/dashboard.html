@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<h2>Doctor Dashboard 👨‍⚕️</h2>
+<p class="lead">Welcome, Dr. {{ session['name'] }}. Here are your upcoming appointments.</p>
+<hr>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4 class="mb-3">Upcoming Appointments (Next 7 Days)</h4>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="#" class="btn btn-sm btn-info">🗓️ Set My Availability</a>
+    </div>
+</div>
+
+{% if appointments %}
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Patient Name</th>
+                <th>Contact Info</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appt in appointments %}
+            <tr>
+                <td>{{ appt['date'] }}</td>
+                <td>{{ appt['time'] }}</td>
+                <td>{{ appt['patient_name'] }}</td>
+                <td>{{ appt['contact_info'] or 'N/A' }}</td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-success">Mark Completed</a>
+                    <a href="#" class="btn btn-sm btn-warning">Cancel</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-light text-center" role="alert">
+    You have no booked appointments scheduled for the next 7 days.
+</div>
+{% endif %}
+
+<h4 class="mt-5">Assigned Patients (Placeholder)</h4>
+<p class="text-muted">Logic to display the list of all patients assigned to this doctor will go here.</p>
+
+{% endblock %}
