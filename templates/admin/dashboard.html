@@ -2,12 +2,21 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<h2>Admin Dashboard 📊</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Welcome, Admin Staff</h2>
+    <!-- Basic Search Bar (based on wireframe) -->
+    <form class="d-flex" action="#" method="GET">
+        <input class="form-control me-2 rounded-pill" type="search" placeholder="doctor, patient, department..." aria-label="Search" name="query">
+        <button class="btn btn-outline-primary rounded-pill" type="submit">🔍 Search</button>
+    </form>
+</div>
+
 <hr>
 
-<div class="row mb-4">
+<!-- 1. Statistics Cards -->
+<div class="row mb-5">
     <div class="col-md-3">
-        <div class="card text-white bg-primary mb-3">
+        <div class="card text-white bg-primary card-shadow">
             <div class="card-body">
                 <h5 class="card-title">Active Doctors</h5>
                 <p class="card-text fs-2">{{ stats['active_doctors'] }}</p>
@@ -15,7 +24,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
+        <div class="card text-white bg-success card-shadow">
             <div class="card-body">
                 <h5 class="card-title">Active Patients</h5>
                 <p class="card-text fs-2">{{ stats['active_patients'] }}</p>
@@ -23,7 +32,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
+        <div class="card text-dark bg-warning card-shadow">
             <div class="card-body">
                 <h5 class="card-title">Upcoming Appts.</h5>
                 <p class="card-text fs-2">{{ stats['upcoming_appointments'] }}</p>
@@ -31,7 +40,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
+        <div class="card text-white bg-info card-shadow">
             <div class="card-body">
                 <h5 class="card-title">Total Appointments</h5>
                 <p class="card-text fs-2">{{ stats['total_appointments'] }}</p>
@@ -40,44 +49,128 @@
     </div>
 </div>
 
-<h3>Doctor Management</h3>
-<a href="#" class="btn btn-sm btn-primary mb-3">➕ Add New Doctor</a>
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Specialization</th>
-            <th>Contact</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for doctor in doctors %}
-        <tr>
-            <td>{{ doctor['user_id'] }}</td>
-            <td>{{ doctor['name'] }}</td>
-            <td>{{ doctor['specialization_name'] }}</td>
-            <td>{{ doctor['contact_info'] or 'N/A' }}</td>
-            <td>
-                {% if doctor['is_active'] %}
-                    <span class="badge bg-success">Active</span>
-                {% else %}
-                    <span class="badge bg-danger">Blacklisted</span>
-                {% endif %}
-            </td>
-            <td>
-                <a href="#" class="btn btn-sm btn-outline-info">Edit</a>
-                {% if doctor['is_active'] %}
-                    <a href="#" class="btn btn-sm btn-danger">Blacklist</a>
-                {% else %}
-                    <a href="#" class="btn btn-sm btn-success">Activate</a>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- Main Content Area -->
+<div class="row">
+    
+    <!-- Registered Doctors Section -->
+    <div class="col-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Registered Doctors</h4>
+                <!-- UPDATED LINK: Links to the new separate page for adding a doctor (/admin/doctor/add) -->
+                <a href="{{ url_for('add_doctor') }}" class="btn btn-sm btn-success">
+                    ➕ Create Doctor
+                </a>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for doctor in doctors %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Dr. {{ doctor['name'] }}</span>
+                        <small class="text-muted">{{ doctor['specialization_name'] }}</small>
+                        <div class="btn-group" role="group">
+                            <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                            <!-- Actions require a POST request -->
+                            <form action="{{ url_for('toggle_user_status', user_id=doctor['user_id'], action='delete') }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-secondary">Delete</button>
+                            </form>
+                            {% if doctor['is_active'] %}
+                                <form action="{{ url_for('toggle_user_status', user_id=doctor['user_id'], action='blacklist') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Blacklist</button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('toggle_user_status', user_id=doctor['user_id'], action='activate') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">No doctors registered yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registered Patients Section -->
+    <div class="col-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Registered Patients</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for patient in patients %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">{{ patient['name'] }}</span>
+                        <small class="text-muted">{{ patient['contact_info'] or 'Contact N/A' }}</small>
+                        <div class="btn-group" role="group">
+                            <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                            <!-- Actions require a POST request -->
+                            <form action="{{ url_for('toggle_user_status', user_id=patient['user_id'], action='delete') }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-secondary">Delete</button>
+                            </form>
+                            {% if patient['is_active'] %}
+                                <form action="{{ url_for('toggle_user_status', user_id=patient['user_id'], action='blacklist') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Blacklist</button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('toggle_user_status', user_id=patient['user_id'], action='activate') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">No patients registered yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upcoming Appointments Section -->
+    <div class="col-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Upcoming Appointments</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Patient Name</th>
+                                <th>Doctor Name</th>
+                                <th>Department</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in appointments %}
+                            <tr>
+                                <td>{{ loop.index }}.</td>
+                                <td>{{ appt['patient_name'] }}</td>
+                                <td>Dr. {{ appt['doctor_name'] }}</td>
+                                <td>{{ appt['department_name'] }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-info">View History</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No upcoming appointments currently booked.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 {% endblock %}

@@ -13,14 +13,13 @@ def get_db_connection():
     return conn
 
 def init_db():
-    """Creates all necessary tables and seeds the initial Admin user."""
+    """Creates all necessary tables and seeds the initial Admin user and Departments."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # --- TABLE CREATION ---
+    # --- TABLE CREATION (Ensure all tables are created first) ---
     
     # 1. User Table (Authentication & Common Details)
-    # Stores basic login and role info for all users (Admin, Doctor, Patient)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +28,7 @@ def init_db():
             role TEXT NOT NULL CHECK(role IN ('Admin', 'Doctor', 'Patient')),
             name TEXT NOT NULL,
             contact_info TEXT,
-            is_active BOOLEAN DEFAULT 1 -- For blacklisting/removal
+            is_active BOOLEAN DEFAULT 1 
         );
     ''')
 
@@ -42,7 +41,7 @@ def init_db():
         );
     ''')
     
-    # 3. Doctor Table (Role-Specific Details, linked to User and Department)
+    # 3. Doctor Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS doctor (
             doctor_id INTEGER PRIMARY KEY,
@@ -53,7 +52,7 @@ def init_db():
         );
     ''')
     
-    # 4. Patient Table (Role-Specific Details, linked to User)
+    # 4. Patient Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS patient (
             patient_id INTEGER PRIMARY KEY,
@@ -62,7 +61,7 @@ def init_db():
         );
     ''')
     
-    # 5. DoctorAvailability Table (For scheduling logic)
+    # 5. DoctorAvailability Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS doctor_availability (
             avail_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,13 +69,12 @@ def init_db():
             date TEXT NOT NULL,
             start_time TEXT NOT NULL,
             end_time TEXT NOT NULL,
-            -- Ensure a doctor doesn't set the same time twice for the same date
             UNIQUE(doctor_id, date, start_time), 
             FOREIGN KEY (doctor_id) REFERENCES doctor (doctor_id)
         );
     ''')
     
-    # 6. Appointment Table (The core event)
+    # 6. Appointment Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS appointment (
             app_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,18 +83,17 @@ def init_db():
             date TEXT NOT NULL,
             time TEXT NOT NULL,
             status TEXT NOT NULL CHECK(status IN ('Booked', 'Completed', 'Cancelled')),
-            -- Prevent multiple appointments at the same date and time for the same doctor
             UNIQUE(doctor_id, date, time), 
             FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
             FOREIGN KEY (doctor_id) REFERENCES doctor (doctor_id)
         );
     ''')
     
-    # 7. Treatment Table (Diagnosis, Prescription, Notes)
+    # 7. Treatment Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS treatment (
             treatment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            app_id INTEGER UNIQUE NOT NULL, -- One treatment record per appointment
+            app_id INTEGER UNIQUE NOT NULL, 
             diagnosis TEXT NOT NULL,
             prescription TEXT NOT NULL,
             notes TEXT,
@@ -104,14 +101,31 @@ def init_db():
         );
     ''')
 
-    # --- ADMIN SEEDING (CRITICAL REQUIREMENT) ---
+    # --- DEPARTMENT SEEDING (NEW CODE) ---
+    departments_to_add = [
+        ('Cardiology', 'Heart and blood vessels.'),
+        ('Neurology', 'Nervous system disorders.'),
+        ('Pediatrics', 'Children and adolescents health.'),
+        ('Orthopedics', 'Musculoskeletal system.'),
+        ('General Practice', 'Primary health care.'),
+    ]
+    
+    # Check if departments exist before inserting to prevent duplicate keys
+    for name, description in departments_to_add:
+        cursor.execute("SELECT dept_id FROM department WHERE name = ?", (name,))
+        if cursor.fetchone() is None:
+            cursor.execute('''
+                INSERT INTO department (name, description)
+                VALUES (?, ?);
+            ''', (name, description))
+            print(f"Seeded department: {name}")
+
+    # --- ADMIN SEEDING (Existing Code) ---
     admin_username = 'admin'
     admin_password = 'adminpassword' 
     
-    # Check if admin already exists to prevent duplication
     cursor.execute("SELECT user_id FROM user WHERE username = ?", (admin_username,))
     if cursor.fetchone() is None:
-        # Hash the password before storing it for security
         admin_password_hash = generate_password_hash(admin_password)
         cursor.execute('''
             INSERT INTO user (username, password_hash, role, name)
@@ -123,10 +137,5 @@ def init_db():
     conn.close()
 
 if __name__ == '__main__':
-    # Initialize DB if running database.py directly
-    if not os.path.exists(DATABASE):
-        print("Database not found. Initializing database...")
-        init_db()
-    else:
-        print("Database already exists. Running init_db() to ensure tables and admin user are present.")
-        init_db()
+    # Running init_db() will ensure tables and data are created/present
+    init_db()

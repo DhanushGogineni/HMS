@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Patient History{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Patient History</h2>
+    <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<div class="alert alert-info p-3 shadow-sm">
+    <p class="mb-1"><strong>Patient Name:</strong> {{ patient_info['name'] }}</p>
+    <p class="mb-1"><strong>Your Department:</strong> {{ patient_info['department_name'] }}</p>
+    <p class="mb-0"><strong>Your Name:</strong> Dr. {{ patient_info['doctor_name'] }}</p>
+</div>
+
+<h4 class="mt-4">Treatment History Records</h4>
+
+{% if history %}
+    {% for record in history %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Visit Date: {{ record['date'] }}</span>
+            <span class="badge bg-primary">App ID: {{ record['app_id'] }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <p class="fw-bold text-danger">Diagnosis:</p>
+                    <p>{{ record['diagnosis'] }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <p class="fw-bold text-success">Prescription/Treatment Plan:</p>
+                    <pre class="bg-light p-2 border rounded">{{ record['prescription'] }}</pre>
+                </div>
+            </div>
+            {% if record['notes'] %}
+                <p class="fw-bold text-muted border-top pt-2">Doctor's Notes:</p>
+                <p class="small">{{ record['notes'] }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-warning text-center">
+        No completed treatment history found for this patient under your care.
+    </div>
+{% endif %}
+
+{% endblock %}

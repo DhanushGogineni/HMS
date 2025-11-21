@@ -1,44 +1,76 @@
-/* static/css/style.css */
+/* static/css/style.css - Realistic UI Overhaul */
+
+/* Define a custom, medical-themed color palette */
+:root {
+    --primary-medical: #0077b6; /* Deep Medical Blue */
+    --success-medical: #00b894; /* Soft Medical Green */
+    --warning-medical: #ffeaa7; /* Soft Yellow Warning */
+    --danger-medical: #d63031; /* Alert Red */
+    --light-bg: #f8f9fa; 
+    --body-text: #333;
+}
 
 body {
-    background-color: #f0f2f5; /* Very light gray/blue background */
-    font-family: Arial, sans-serif;
+    background-color: var(--light-bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--body-text);
 }
 
-/* Enhancing navigation and cards */
+/* Enhancing navigation and base styles */
 .bg-primary {
-    background-color: #007bff !important;
+    background-color: var(--primary-medical) !important;
+}
+.btn-primary {
+    background-color: var(--primary-medical);
+    border-color: var(--primary-medical);
+}
+.btn-success {
+    background-color: var(--success-medical);
+    border-color: var(--success-medical);
+}
+.btn-danger {
+    background-color: var(--danger-medical);
+    border-color: var(--danger-medical);
 }
 
-.shadow-lg {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+/* Professional Shadows and Cards */
+.card-shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: none; /* Remove default border for cleaner look */
 }
 
-/* Custom button styles */
-.btn-primary, .btn-success, .btn-danger {
-    transition: all 0.2s ease-in-out;
+.card-shadow:hover {
+    box-shadow: 0 0.7rem 1.4rem rgba(0, 0, 0, 0.1);
 }
 
-.btn:hover {
-    filter: brightness(1.1);
-}
-
-/* Rounded corners for better aesthetics */
 .rounded-pill {
     border-radius: 50rem !important;
 }
 
-/* Dashboard Card Styles */
-.card-body {
-    padding: 1.5rem;
+/* Dashboard Statistics Styling */
+.stat-card {
+    border-left: 5px solid var(--primary-medical);
+    transition: all 0.2s;
 }
 
-.card-title {
-    font-weight: 600;
+.stat-card.bg-primary {
+    border-left-color: var(--success-medical) !important;
+}
+.stat-card.bg-success {
+    border-left-color: var(--primary-medical) !important;
 }
 
-/* Table styling for dashboards */
-.table-hover tbody tr:hover {
-    background-color: #e2f1ff;
-    cursor: pointer;
+/* List/Table Styling */
+.list-group-item {
+    border-left: 5px solid transparent;
+    transition: border-left 0.2s;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    background-color: white;
+}
+.list-group-item:hover {
+    background-color: #f0f8ff; /* Lightest blue on hover */
+    border-left: 5px solid var(--primary-medical);
 }

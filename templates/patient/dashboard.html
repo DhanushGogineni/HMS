@@ -6,37 +6,26 @@
 <p class="lead">Your medical records and appointment management center.</p>
 <hr>
 
+<!-- Section 1: Doctor Search and Booking -->
 <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-success text-white">
-        <h5>Book a New Appointment</h5>
+    <div class="card-header bg-info text-white">
+        <h5>Departments & Booking</h5>
     </div>
     <div class="card-body">
-        <p>Search doctors by specialization to check their availability:</p>
-        <form method="GET" action="#">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="specialization" class="form-label">Specialization</label>
-                    <select class="form-select" id="specialization" name="specialization" required>
-                        <option value="">Select Specialization</option>
-                        {% for dept in departments %}
-                            <option value="{{ dept['dept_id'] }}">{{ dept['name'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-6 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">🔍 Search Availability</button>
-                </div>
-            </div>
-        </form>
-        <div class="mt-3">
-            <h6 class="text-muted">Available Departments:</h6>
+        <p class="fw-bold mb-2">Departments:</p>
+        <ul class="list-group">
             {% for dept in departments %}
-                <span class="badge bg-secondary me-2">{{ dept['name'] }}</span>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ dept['name'] }}
+                    <!-- UPDATED LINK -->
+                    <a href="{{ url_for('view_department', dept_id=dept['dept_id']) }}" class="btn btn-sm btn-primary">View Details</a>
+                </li>
             {% endfor %}
-        </div>
+        </ul>
     </div>
 </div>
 
+<!-- Section 2: Upcoming Appointments -->
 <h4 class="mt-4">Upcoming Appointments</h4>
 {% if upcoming_appointments %}
 <div class="table-responsive mb-4">
@@ -44,7 +33,7 @@
         <thead class="table-warning">
             <tr>
                 <th>Doctor</th>
-                <th>Specialization</th>
+                <th>Dept</th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Status</th>
@@ -60,8 +49,11 @@
                 <td>{{ appt['time'] }}</td>
                 <td><span class="badge bg-warning text-dark">{{ appt['status'] }}</span></td>
                 <td>
-                    <a href="#" class="btn btn-sm btn-danger">Cancel</a>
-                    <a href="#" class="btn btn-sm btn-info">Reschedule</a>
+                    <!-- Link to cancel appointment (using a form for POST) -->
+                    <form action="{{ url_for('patient_cancel_appointment', app_id=appt['app_id']) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</button>
+                    </form>
+                    <a href="#" class="btn btn-sm btn-info disabled">Reschedule (TBD)</a>
                 </td>
             </tr>
             {% endfor %}
@@ -75,6 +67,7 @@
 {% endif %}
 
 
+<!-- Section 3: Appointment History and Treatment -->
 <h4 class="mt-4">Past Appointment History</h4>
 {% if past_appointments %}
 <div class="accordion" id="historyAccordion">
@@ -89,7 +82,6 @@
             <div class="accordion-body">
                 <strong>Diagnosis:</strong> <p class="alert alert-secondary p-2 mt-1">{{ appt['diagnosis'] or 'Diagnosis not recorded.' }}</p>
                 <strong>Prescription:</strong> <p class="alert alert-light p-2">{{ appt['prescription'] or 'Prescription not recorded.' }}</p>
-                <a href="#" class="btn btn-sm btn-outline-primary">View Full Notes</a>
             </div>
         </div>
     </div>

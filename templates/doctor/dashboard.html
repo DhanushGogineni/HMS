@@ -3,40 +3,49 @@
 
 {% block content %}
 <h2>Doctor Dashboard 👨‍⚕️</h2>
-<p class="lead">Welcome, Dr. {{ session['name'] }}. Here are your upcoming appointments.</p>
+<p class="lead">Welcome, Dr. {{ session['name'] }}. Manage your appointments and patient history.</p>
 <hr>
 
 <div class="row mb-4">
     <div class="col-md-6">
-        <h4 class="mb-3">Upcoming Appointments (Next 7 Days)</h4>
+        <h4 class="mb-3">Upcoming Appointments (Booked)</h4>
     </div>
     <div class="col-md-6 text-end">
-        <a href="#" class="btn btn-sm btn-info">🗓️ Set My Availability</a>
+        <!-- Link to the new availability route -->
+        <a href="{{ url_for('set_doctor_availability') }}" class="btn btn-primary">🗓️ Provide Availability</a>
     </div>
 </div>
 
 {% if appointments %}
-<div class="table-responsive">
+<div class="table-responsive mb-5">
     <table class="table table-bordered table-hover">
         <thead class="table-primary">
             <tr>
+                <th>App ID</th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Patient Name</th>
-                <th>Contact Info</th>
-                <th>Action</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for appt in appointments %}
             <tr>
+                <td>{{ appt['app_id'] }}</td>
                 <td>{{ appt['date'] }}</td>
                 <td>{{ appt['time'] }}</td>
                 <td>{{ appt['patient_name'] }}</td>
-                <td>{{ appt['contact_info'] or 'N/A' }}</td>
                 <td>
-                    <a href="#" class="btn btn-sm btn-success">Mark Completed</a>
-                    <a href="#" class="btn btn-sm btn-warning">Cancel</a>
+                    <!-- Link to view history before consultation -->
+                    <a href="{{ url_for('doctor_view_patient_history', patient_id=appt['patient_id']) }}" class="btn btn-sm btn-info">View History</a>
+                    
+                    <!-- Action to mark appointment as completed and input treatment details (POST to the update route) -->
+                    <a href="{{ url_for('update_treatment', app_id=appt['app_id']) }}" class="btn btn-sm btn-success">Mark Completed</a>
+
+                    <!-- Action to cancel appointment (using a form for POST) -->
+                    <form action="{{ url_for('doctor_cancel_appointment', app_id=appt['app_id']) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
@@ -44,12 +53,21 @@
     </table>
 </div>
 {% else %}
-<div class="alert alert-light text-center" role="alert">
-    You have no booked appointments scheduled for the next 7 days.
+<div class="alert alert-light text-center mb-5" role="alert">
+    You have no booked appointments scheduled.
 </div>
 {% endif %}
 
-<h4 class="mt-5">Assigned Patients (Placeholder)</h4>
-<p class="text-muted">Logic to display the list of all patients assigned to this doctor will go here.</p>
+<h4 class="mt-4">Assigned Patients</h4>
+<div class="list-group">
+    {% for patient in assigned_patients %}
+        <a href="{{ url_for('doctor_view_patient_history', patient_id=patient['patient_id']) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span class="fw-bold">{{ patient['patient_name'] }}</span>
+            <span class="btn btn-sm btn-outline-primary">View History</span>
+        </a>
+    {% else %}
+        <p class="text-muted">No patients have been assigned appointments with you yet.</p>
+    {% endfor %}
+</div>
 
 {% endblock %}

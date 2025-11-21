@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Book with Dr. {{ doctor_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Availability for Dr. {{ doctor_name }}</h2>
+    <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+{% if available_slots %}
+<div class="card shadow-lg p-4">
+    <p class="text-muted">Click an available (green) slot to book an appointment.</p>
+    <div class="row">
+        {% for date_str, slots in available_slots.items() %}
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white text-center fw-bold">
+                        {{ date_str }}
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-2">
+                            {% for slot in slots %}
+                                {% if not slot['is_booked'] %}
+                                    <!-- Available Slot: Link to booking POST route -->
+                                    <form action="{{ url_for('book_appointment', doctor_id=doctor_id, date_str=date_str, time_str=slot['time']) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-success w-100">
+                                            {{ slot['time'] }} - {{ slot['end_time'] }} (Book)
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <!-- Booked Slot: Disabled -->
+                                    <button class="btn btn-sm btn-danger w-100" disabled>
+                                        {{ slot['time'] }} - {{ slot['end_time'] }} (Booked)
+                                    </button>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+    <div class="alert alert-warning text-center">
+        Dr. {{ doctor_name }} has not set their availability for the next 7 days, or all slots are booked.
+    </div>
+{% endif %}
+{% endblock %}

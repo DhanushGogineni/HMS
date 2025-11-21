@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Add New Doctor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white text-center rounded-top">
+                <h3 class="mb-0">Add a New Doctor Profile</h3>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('add_doctor') }}" method="POST">
+                    
+                    <div class="mb-3">
+                        <label for="fullname" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="fullname" name="name" placeholder="Dr. Jane Doe" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username (for Login)</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="jdoe" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Initial Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Set initial password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="specialization" class="form-label">Specialization/Department</label>
+                        <select class="form-select" id="specialization" name="dept_id" required>
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept['dept_id'] }}">{{ dept['name'] }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Departments must be created in the database first.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contact_info" class="form-label">Contact Info (Email or Phone)</label>
+                        <input type="text" class="form-control" id="contact_info" name="contact_info" placeholder="jdoe@hospital.com">
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+                        <button type="submit" class="btn btn-success">Create Doctor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

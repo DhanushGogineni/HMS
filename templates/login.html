@@ -4,24 +4,24 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary text-white text-center">
+        <div class="card card-shadow border-0">
+            <div class="card-header bg-primary text-white text-center rounded-top-2" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;">
                 <h3 class="mb-0">User Login</h3>
             </div>
             <div class="card-body p-4">
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <input type="text" class="form-control rounded-pill" id="username" name="username" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <input type="password" class="form-control rounded-pill" id="password" name="password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-2">Log In</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-3 rounded-pill">Log In</button>
                 </form>
                 <p class="mt-4 text-center">
-                    Don't have a Patient account? <a href="{{ url_for('register') }}">Register here</a>.
+                    Don't have a Patient account? <a href="{{ url_for('register') }}" class="text-success-medical">Register here</a>.
                 </p>
                 <p class="mt-2 text-center text-muted small">
                     **Admin Demo:** username=admin, password=adminpassword
